@@ -24,9 +24,24 @@ export default function App() {
   const [toDos, setToDos] = useState({});
   useEffect(() => {
     loadToDos();
+    rememberWorking();
   }, []);
-  const travel = () => setWorking(false);
-  const work = () => setWorking(true);
+  const travel = async () => {
+    try {
+      setWorking(false);
+      await AsyncStorage.setItem("working", JSON.stringify(false));
+    } catch {
+      console.log("failed");
+    }
+  };
+  const work = async () => {
+    try {
+      setWorking(true);
+      await AsyncStorage.setItem("working", JSON.stringify(true));
+    } catch {
+      console.log("failed");
+    }
+  };
   const onChangeText = (payload) => setText(payload);
   const saveToDos = async (toSave) => {
     // 로딩 state 넣고 실패 했을 시 안내 문 띄어주기
@@ -77,7 +92,15 @@ export default function App() {
       },
     ]);
   };
-
+  const rememberWorking = async () => {
+    try {
+      const working = await AsyncStorage.getItem("working");
+      setWorking(JSON.parse(working));
+    } catch {
+      console.log("failed");
+    }
+  };
+  console.log(toDos);
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
