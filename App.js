@@ -72,7 +72,10 @@ export default function App() {
     }); 
     */
     // spread 연산자 활용
-    const newToDos = { ...toDos, [Date.now()]: { text, working } };
+    const newToDos = {
+      ...toDos,
+      [Date.now()]: { text, working, complete: false },
+    };
     setToDos(newToDos);
     await saveToDos(newToDos);
     setText("");
@@ -100,7 +103,26 @@ export default function App() {
       console.log("failed");
     }
   };
-  console.log(toDos);
+  const completeToDo = (key) => {
+    Alert.alert("Have you finished", "your to-dos?", [
+      { text: "Cancel" },
+      {
+        text: "I'm sure",
+        style: "destructive",
+        onPress: async () => {
+          const newToDos = { ...toDos };
+          if (newToDos[key].complete === false) {
+            newToDos[key].complete = true;
+          } else {
+            newToDos[key].complete = false;
+          }
+          setToDos(newToDos);
+          saveToDos(newToDos);
+        },
+      },
+    ]);
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
@@ -137,10 +159,35 @@ export default function App() {
         {Object.keys(toDos).map((key) =>
           toDos[key].working === working ? (
             <View style={styles.toDo} key={key}>
-              <Text style={styles.toDoText}>{toDos[key].text}</Text>
-              <TouchableOpacity onPress={() => deleteToDo(key)}>
-                <Fontisto name="trash" size={18} color={theme.grey} />
-              </TouchableOpacity>
+              {toDos[key].complete === false ? (
+                <Text style={styles.toDoText}>{toDos[key].text}</Text>
+              ) : (
+                <Text
+                  style={{
+                    ...styles.toDoText,
+                    textDecorationLine: "line-through",
+                    textDecorationColor: "red",
+                  }}
+                >
+                  {toDos[key].text}
+                </Text>
+              )}
+
+              <View style={styles.ikon}>
+                <TouchableOpacity
+                  style={{ marginRight: 20 }}
+                  onPress={() => completeToDo(key)}
+                >
+                  <Fontisto
+                    name="checkbox-passive"
+                    size={18}
+                    color={theme.grey}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => deleteToDo(key)}>
+                  <Fontisto name="trash" size={18} color={theme.grey} />
+                </TouchableOpacity>
+              </View>
             </View>
           ) : null
         )}
@@ -187,5 +234,8 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "600",
+  },
+  ikon: {
+    flexDirection: "row",
   },
 });
